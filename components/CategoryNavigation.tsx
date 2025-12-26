@@ -7,13 +7,13 @@ import { Search, Filter, ShoppingCart, Star, ArrowRight } from "lucide-react";
 const sampleProducts = [
   {
     id: 1,
-    title: "iPhone 14 Pro Display",
+    title: "iPhone 16 Display",
     category: "Apple",
     price: 89.99,
     originalPrice: 129.99,
     rating: 4.5,
     reviews: 234,
-    image: "https://images.unsplash.com/photo-1592286927505-634021e3c98b?w=400&h=400&fit=crop",
+    image: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766763921/eynnsb6erg8mil1tsg5k.jpg",
     inStock: true,
     badge: "Best Seller"
   },
