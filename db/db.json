@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Pink Princess Dress",
+    "description": "A beautiful pink dress perfect for any princess. Made with soft cotton and lace accents, ideal for parties and special events.",
+    "discountPercentage": 48,
+    "image": ["/kid_dresses/product1.webp", "/kid_dresses/product1.webp"],
+    "category": "Kids Dresses",
+    "price": 28.99,
+    "sizes": {
+      "XS": { "stock": 5, "price": 28.99 },
+      "S": { "stock": 10, "price": 29.99 },
+      "M": { "stock": 15, "price": 30.99 },
+      "L": { "stock": 10, "price": 32.99 },
+      "XL": { "stock": 5, "price": 34.99 },
+      "XXL": { "stock": 5, "price": 36.99 }
+    },
+    "details": {
+      "material": "Cotton and lace"
+     
+    }
+  },
+  {
+    "name": "Blue Denim Dress",
+    "description": "A stylish and comfortable denim dress with a flared skirt. Great for casual outings and everyday wear.",
+    "discountPercentage": 48,
+    "image": ["/kid_dresses/product2.webp", "/kid_dresses/product2.webp"],
+    "category": "Kids Dresses",
+    "price": 23.99,
+    "sizes": {
+      "XS": { "stock": 5, "price": 23.99 },
+      "S": { "stock": 8, "price": 24.99 },
+      "M": { "stock": 10, "price": 25.99 },
+      "L": { "stock": 5, "price": 26.99 },
+      "XL": { "stock": 2, "price": 27.99 },
+      "XXL": { "stock": 0, "price": 28.99 }
+    },
+    "details": {
+      "material": "Denim"
+   
+    }
+  },
+  {
+    "name": "Floral Summer Dress",
+    "description": "A lightweight summer dress with a vibrant floral print. Perfect for sunny days at the park or beach.",
+    "discountPercentage": 48,
+    "image": ["/kid_dresses/product3.webp", "/kid_dresses/product3.webp"],
+    "category": "Kids Dresses",
+    "price": 18.99,
+    "sizes": {
+      "XS": { "stock": 15, "price": 18.99 },
+      "S": { "stock": 20, "price": 19.99 },
+      "M": { "stock": 30, "price": 20.99 },
+      "L": { "stock": 25, "price": 22.99 },
+      "XL": { "stock": 10, "price": 23.99 },
+      "XXL": { "stock": 5, "price": 24.99 }
+    },
+    "details": {
+      "material": "Cotton"
+     
+    }
+  },
+  {
+    "name": "Red Velvet Holiday Dress",
+    "description": "A luxurious red velvet dress perfect for the holidays or any formal occasion. Features a bow tie at the back for a festive look.",
+    "discountPercentage": 48,
+    "image": ["/kid_dresses/product4.jpg", "/kid_dresses/product4.jpg"],
+    "category": "Kids Dresses",
+    "price": 48.99,
+    "sizes": {
+      "XS": { "stock": 3, "price": 48.99 },
+      "S": { "stock": 5, "price": 49.99 },
+      "M": { "stock": 7, "price": 50.99 },
+      "L": { "stock": 3, "price": 51.99 },
+      "XL": { "stock": 2, "price": 53.99 },
+      "XXL": { "stock": 0, "price": 55.99 }
+    },
+    "details": {
+      "material": "Velvet"
+     
+    }
+  },
+  {
+    "name": "Traditional Green Chudithar",
+    "description": "A beautiful green chudithar made of silk, perfect for festive occasions.",
+    "category": "Chudithars",
+    "price": 39.99,
+    "sizes": {
+      "XS": { "stock": 5, "price": 39.99 },
+      "S": { "stock": 10, "price": 40.99 },
+      "M": { "stock": 7, "price": 42.99 },
+      "L": { "stock": 4, "price": 43.99 },
+      "XL": { "stock": 3, "price": 45.99 },
+      "XXL": { "stock": 2, "price": 47.99 }
+    },
+    "image": ["/chudithars/product1.jpg", "/chudithars/product2.jpg"],
+    "discountPercentage": 30,
+    "details": {
+      "material": "Silk"
+      
+    }
+  }
+]
