@@ -11,8 +11,8 @@ const HeroSection = () => {
 
     const carouselItems = [
         {
-            desktopSrc: "/carousel/carousel-01.jpg",
-            mobileSrc: "/carousel/carousel-01.jpg",
+            desktopSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766837370/reaut0zpbe5xzdcyk8oj.jpg",
+            mobileSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766837370/reaut0zpbe5xzdcyk8oj.jpg",
             alt: "Premium Mobile Parts",
             title: "Quality Parts, Reliable Repairs",
             subtitle: "PREMIUM SPARE PARTS",
@@ -20,8 +20,8 @@ const HeroSection = () => {
             accent: "from-[#0066cc]/60 to-black/80",
         },
         {
-            desktopSrc: "/carousel/carousel-02.jpg",
-            mobileSrc: "/carousel/carousel-02.jpg",
+            desktopSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766838377/tsqppnj1byhja2p275r1.jpg",
+            mobileSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766838377/tsqppnj1byhja2p275r1.jpg",
             alt: "New Stock Arrivals",
             title: "Fresh Stock Arrived",
             subtitle: "NEW ARRIVALS",
@@ -29,8 +29,8 @@ const HeroSection = () => {
             accent: "from-[#ff6600]/60 to-black/80",
         },
         {
-            desktopSrc: "/carousel/carousel-03.jpg",
-            mobileSrc: "/carousel/carousel-03.jpg",
+            desktopSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766838873/uvbypxvxycl0uaxk0af9.jpg",
+            mobileSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766838873/uvbypxvxycl0uaxk0af9.jpg",
             alt: "Screen Replacements",
             title: "Display Solutions",
             subtitle: "SCREENS & DISPLAYS",
@@ -38,8 +38,8 @@ const HeroSection = () => {
             accent: "from-[#0066cc]/60 to-black/80",
         },
         {
-            desktopSrc: "/carousel/carousel-04.jpg",
-            mobileSrc: "/carousel/carousel-04.jpg",
+            desktopSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766839099/kmas8b8s21snss8gf2tk.jpg",
+            mobileSrc: "https://res.cloudinary.com/dry3pzan6/image/upload/v1766839099/kmas8b8s21snss8gf2tk.jpg",
             alt: "Battery Replacements",
             title: "Power Up Your Device",
             subtitle: "BATTERIES & POWER",
@@ -136,7 +136,7 @@ const HeroSection = () => {
                                             onClick={() => router.push("/products")}
                                             variant="outline"
                                             size="lg"
-                                            className="border-2 border-white/80 text-white hover:bg-white hover:text-[#0066cc] font-bold px-10 py-7 rounded-full backdrop-blur-md transition-all duration-500 transform hover:scale-105"
+                                            className="bg-[#0066cc] text-white hover:bg-[#0052a3] hover:text-[#ffffff] font-bold px-10 py-7 rounded-full backdrop-blur-md transition-all duration-500 transform hover:scale-105"
                                         >
                                             VIEW ALL PARTS
                                         </Button>

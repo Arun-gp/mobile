@@ -2,348 +2,476 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ProductFilters } from "@/components/ProductFilters";
-import { useAuth } from "@/context/AuthContext";
-import { toast } from "react-toastify";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Search, Laptop, Smartphone, Apple, MonitorSmartphone, Star, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Search, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 
 interface Product {
-  _id: string;
+  id: number;
   name: string;
-  price: number;
-  image: string;
   category: string;
-  discountPercentage: number;
-  sizes?: {
-    [key: string]: {
-      stock: number;
-      price: number;
-    }
-  };
-}
+  categoryType: string;
+  originalPrice: number;
+  price: number;
+  discount: number;
+  image: string;
+  rating: number;
+  inStock: boolean;
+} 
 
-interface ProductsListProps {
-  filteredProducts: Product[];
-  page: number;
-  totalPages: number;
-  currentCategory: string;
-  priceRange: { min: number; max: number };
-}
+// Sample products for each category
+const allProducts: Product[] = [
+  // Laptop Spare Parts
+  {
+    id: 1,
+    name: "15V Adapter Charger",
+    category: "Laptop Spare Parts, Laptop Adapter, Microsoft Surface Adapter",
+    categoryType: "laptop",
+    originalPrice: 11999,
+    price: 2449,
+    discount: 80,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 2,
+    name: "18W Power Adapter",
+    category: "Laptop Spare Parts, Laptop Adapter, Samsung Laptop Adapter",
+    categoryType: "laptop",
+    originalPrice: 2500,
+    price: 1299,
+    discount: 48,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 3,
+    name: "19v 3.42a 65w Laptop Adapter",
+    category: "Laptop Adapter, Acer Laptop Adapter, Laptop Spare Parts",
+    categoryType: "laptop",
+    originalPrice: 2200,
+    price: 1199,
+    discount: 46,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 4,
+    name: "1TB Seagate",
+    category: "Laptop Spare Parts, Laptop Hard Drive",
+    categoryType: "laptop",
+    originalPrice: 10000,
+    price: 5499,
+    discount: 45,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  // Mobile Spare Parts
+  {
+    id: 5,
+    name: "Mobile Display Screen",
+    category: "Mobile Spare Parts, LCD Display, Touch Screen",
+    categoryType: "mobile",
+    originalPrice: 3500,
+    price: 1799,
+    discount: 49,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 6,
+    name: "Mobile Battery 4000mAh",
+    category: "Mobile Spare Parts, Replacement Battery",
+    categoryType: "mobile",
+    originalPrice: 1200,
+    price: 599,
+    discount: 50,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 7,
+    name: "Charging Port Flex Cable",
+    category: "Mobile Spare Parts, Charging Port, Flex Cable",
+    categoryType: "mobile",
+    originalPrice: 800,
+    price: 399,
+    discount: 50,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 8,
+    name: "Mobile Speaker Set",
+    category: "Mobile Spare Parts, Speaker, Audio Components",
+    categoryType: "mobile",
+    originalPrice: 600,
+    price: 299,
+    discount: 50,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  // iPhone Spare Parts
+  {
+    id: 9,
+    name: "iPhone 13 Display",
+    category: "iPhone Spare Parts, iPhone Display, OLED Screen",
+    categoryType: "iphone",
+    originalPrice: 15000,
+    price: 8999,
+    discount: 40,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 10,
+    name: "iPhone Battery",
+    category: "iPhone Spare Parts, Original Battery",
+    categoryType: "iphone",
+    originalPrice: 3500,
+    price: 1999,
+    discount: 43,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 11,
+    name: "iPhone Charging Flex",
+    category: "iPhone Spare Parts, Lightning Port, Charging Flex",
+    categoryType: "iphone",
+    originalPrice: 2000,
+    price: 1199,
+    discount: 40,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 12,
+    name: "iPhone Camera Module",
+    category: "iPhone Spare Parts, Front & Rear Camera",
+    categoryType: "iphone",
+    originalPrice: 5000,
+    price: 2999,
+    discount: 40,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  // Mac Spare Parts
+  {
+    id: 13,
+    name: "MacBook Display",
+    category: "Mac Spare Parts, Retina Display, LCD Screen",
+    categoryType: "mac",
+    originalPrice: 35000,
+    price: 21999,
+    discount: 37,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 14,
+    name: "MacBook Battery",
+    category: "Mac Spare Parts, Original Battery, A1502",
+    categoryType: "mac",
+    originalPrice: 8000,
+    price: 4999,
+    discount: 38,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 15,
+    name: "MacBook Trackpad",
+    category: "Mac Spare Parts, Trackpad, Force Touch",
+    categoryType: "mac",
+    originalPrice: 6000,
+    price: 3799,
+    discount: 37,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+  {
+    id: 16,
+    name: "MacBook Keyboard",
+    category: "Mac Spare Parts, Keyboard, Replacement",
+    categoryType: "mac",
+    originalPrice: 12000,
+    price: 7499,
+    discount: 38,
+    image: "/api/placeholder/300/300",
+    rating: 5,
+    inStock: true,
+  },
+];
 
-export default function ProductsList({
-  filteredProducts,
-  page,
-  totalPages,
-  currentCategory,
-  priceRange
-}: ProductsListProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user } = useAuth() as { user: { uid: string } | null };
-  const [category, setCategory] = useState<string>(currentCategory || "");
-  const [query, setQuery] = useState<string>(searchParams.get("query") || "");
+export default function SparePartsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const [priceFilter, setPriceFilter] = useState<number[]>([
-    parseInt(searchParams.get("minPrice") || "0") || priceRange?.min || 0,
-    parseInt(searchParams.get("maxPrice") || "10000") || priceRange?.max || 10000
-  ]);
-
-  const categories = [
-    "Gown",
-    "Chudithars",
-    "Shawl",
-    "Night Dress",
-    "Leggins"
-  ];
-
-  const sizeOrder = ["S", "M", "L", "XL", "XXL"];
-
-  const addToWishlist = async (product: Product) => {
-    if (!user) {
-      toast.error("Please login to use wishlist");
-      return;
-    }
-    try {
-      const res = await fetch('/api/wishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.uid,
-          productId: product._id,
-          productData: {
-            name: product.name,
-            price: product.price,
-            image: product.image
-          }
-        })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.message);
-      } else {
-        toast.info(data.message);
-      }
-    } catch (e) {
-      toast.error("Failed to add to wishlist");
-    }
-  };
-
-  const updateFilters = (newCategory: string, newPrice: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (newCategory) params.set("category", newCategory);
-    else params.delete("category");
-
-    if (newPrice) {
-      params.set("minPrice", "0");
-      params.set("maxPrice", newPrice.toString());
-    }
-
-    params.delete("page");
-    router.push(`/products?${params.toString()}`);
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (query) params.set("query", query);
-    else params.delete("query");
-    params.delete("page");
-    router.push(`/products?${params.toString()}`);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    router.push(`/products?${params.toString()}`);
-  };
-
-  const calculateDiscountedPrice = (price: number, discountPercentage: number) => {
-    return Math.floor(price * (1 - discountPercentage / 100));
-  };
+  // Filter products based on selected category AND search query
+  const filteredProducts = allProducts.filter(product => {
+    // First filter by category if selected
+    const categoryMatch = selectedCategory === null || product.categoryType === selectedCategory;
+    
+    // Then filter by search query if provided
+    const searchMatch = searchQuery.trim() === "" || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return categoryMatch && searchMatch;
+  });
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 uppercase tracking-tight">
+            Spare Parts Catalog
+          </h1>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Browse our comprehensive collection of genuine spare parts for all your devices
+          </p>
+        </div>
 
-        {/* Header - Minimalist */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Our Collection</h1>
-            <p className="text-gray-500">Premium quality for your everyday look</p>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            <form onSubmit={handleSearchSubmit} className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 group-focus-within:text-indigo-600" />
+        {/* Search and Filter Section */}
+        <div className="mb-10">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+            {/* Search Bar */}
+            <div className="relative w-full md:w-96 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-[#048567]" />
               <Input
-                placeholder="Search..."
-                value={query}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 w-48 focus:w-64 transition-all duration-300 border-gray-200 rounded-full bg-gray-50"
+                placeholder="Search spare parts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-4 py-6 w-full border-2 border-gray-200 rounded-2xl bg-white focus:border-[#048567] transition-all text-base shadow-sm"
               />
-            </form>
+            </div>
+          </div>
 
-            <ProductFilters
-              categories={categories}
-              selectedCategory={category}
-              setSelectedCategory={(c: string) => {
-                setCategory(c);
-                updateFilters(c, priceFilter[1] ?? 10000);
-              }}
-              priceRange={priceFilter[1] ?? 10000}
-              setPriceRange={(p: number) => {
-                setPriceFilter([0, p]);
-                updateFilters(category, p);
-              }}
-              minPrice={0}
-              maxPrice={priceRange?.max ?? 10000}
-            />
+          {/* Category Filter Buttons */}
+          <div className="flex flex-wrap gap-3 justify-center mt-6">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
+                selectedCategory === null
+                  ? "bg-[#048567] text-white shadow-lg scale-105"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+              }`}
+            >
+              All Categories
+            </button>
+            <button
+              onClick={() => setSelectedCategory("laptop")}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                selectedCategory === "laptop"
+                  ? "bg-[#048567] text-white shadow-lg scale-105"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+              }`}
+            >
+              <Laptop className="w-4 h-4" />
+              Laptop Spare Parts
+            </button>
+            <button
+              onClick={() => setSelectedCategory("mobile")}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                selectedCategory === "mobile"
+                  ? "bg-[#048567] text-white shadow-lg scale-105"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+              }`}
+            >
+              <Smartphone className="w-4 h-4" />
+              Mobile Spare Parts
+            </button>
+            <button
+              onClick={() => setSelectedCategory("iphone")}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                selectedCategory === "iphone"
+                  ? "bg-[#048567] text-white shadow-lg scale-105"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+              }`}
+            >
+              <Apple className="w-4 h-4" />
+              iPhone Spare Parts
+            </button>
+            <button
+              onClick={() => setSelectedCategory("mac")}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                selectedCategory === "mac"
+                  ? "bg-[#048567] text-white shadow-lg scale-105"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+              }`}
+            >
+              <MonitorSmartphone className="w-4 h-4" />
+              Mac Spare Parts
+            </button>
           </div>
         </div>
 
-        {/* Category Buttons - Styled pill shape */}
-        <div className="flex flex-wrap gap-2 mb-10 overflow-x-auto pb-2 scrollbar-hide">
-          <button
-            onClick={() => {
-              setCategory("");
-              updateFilters("", priceFilter[1] ?? 10000);
-            }}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap ${!category ? 'bg-[#048567] text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-          >
-            All Products
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                setCategory(cat);
-                updateFilters(cat, priceFilter[1] ?? 10000);
-              }}
-              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap ${category === cat ? 'bg-[#048567] text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {/* Search Results Count */}
+        {searchQuery.trim() !== "" && (
+          <div className="mb-4 text-center">
+            <p className="text-gray-600">
+              Found {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''} for "{searchQuery}"
+            </p>
+          </div>
+        )}
 
-        {/* Products Grid - More columns for smaller image footprint */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 gap-y-10">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <div key={product._id} className="group flex flex-col">
-                {/* Image Container - Square and compact */}
-                <div className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-gray-50 mb-4 shadow-sm border border-gray-100">
-                  <Link href={`/product/${product._id}`} className="block w-full h-full">
-                    {product.image ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
-                    )}
-                  </Link>
-
-                  {/* Badges */}
-                  <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                    <span className="bg-[#048567] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm tracking-wider uppercase">NEW</span>
-                    {product.discountPercentage > 0 && (
-                      <span className="bg-[#cc0000] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm tracking-wider uppercase">-{product.discountPercentage}%</span>
-                    )}
-                  </div>
-
-                  {/* Wishlist Button */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      addToWishlist(product);
-                    }}
-                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white hover:scale-110 transition-all duration-200"
-                  >
-                    <Heart className="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors" />
-                  </button>
-                </div>
-
-                {/* Product Info */}
-                <div className="flex flex-col flex-grow px-1">
-                  <span className="text-[10px] font-black text-[#048567] uppercase tracking-widest mb-1.5 px-0.5">
-                    {product.category || "General"}
-                  </span>
-
-                  <Link href={`/product/${product._id}`}>
-                    <h3 className="text-sm font-bold text-gray-800 mb-2 leading-tight group-hover:text-[#048567] transition-colors min-h-[2.5rem] line-clamp-2 uppercase tracking-tight">
-                      {product.name}
-                    </h3>
-                  </Link>
-
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[#048567] font-black text-lg">
-                      ₹{calculateDiscountedPrice(product.price, product.discountPercentage)}
-                    </span>
-                    {product.discountPercentage > 0 && (
-                      <>
-                        <span className="text-gray-400 text-xs translate-y-0.5 line-through font-medium">₹{product.price}</span>
-                        <span className="text-[#048567] text-[10px] translate-y-0.5 font-black uppercase">{product.discountPercentage}% OFF</span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Divider Line before Sizes */}
-                  <div className="h-px w-full bg-gray-100 mb-4"></div>
-
-                  {/* Size Selection UI - Dynamic */}
-                  <div className="mt-auto">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Size:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {Object.keys(product.sizes || {}).sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b)).map((size) => {
-                        const sizeData = product.sizes?.[size];
-                        const isAvailable = sizeData && sizeData.stock > 0;
-                        return (
-                          <div
-                            key={size}
-                            className={`w-9 h-14 flex items-center justify-center border text-[11px] font-black transition-all rounded-[1.2rem] ${isAvailable
-                              ? 'border-gray-200 text-black bg-white hover:border-[#048567] hover:text-[#048567] cursor-pointer'
-                              : 'border-gray-100 text-gray-300 bg-gray-50/50 relative overflow-hidden'
-                              }`}
-                          >
-                            {size}
-                            {!isAvailable && (
-                              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center opacity-30">
-                                <div className="w-full h-[1px] bg-gray-400 rotate-[55deg]"></div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+        {/* Featured Products Section */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-black text-gray-900 mb-6 uppercase">
+            {searchQuery.trim() !== "" ? "Search Results" : "Featured Products"}
+          </h2>
+          
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-bold text-gray-700 mb-2">No products found</h3>
+              <p className="text-gray-500">
+                {searchQuery.trim() !== "" 
+                  ? `No products match your search for "${searchQuery}". Try a different term.`
+                  : "No products available in this category."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
+                >
+                  {/* Product Image */}
+                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    {/* Discount Badge */}
+                    <div className="absolute top-3 left-3">
+                      <div className="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+                        <span className="text-sm font-black">-{product.discount}%</span>
+                      </div>
+                    </div>
+                    {/* NEW Badge */}
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-black text-white text-xs font-black px-3 py-1 rounded uppercase">
+                        NEW
+                      </span>
                     </div>
                   </div>
+
+                  {/* Product Info */}
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-3 line-clamp-2 leading-relaxed">
+                      {product.category}
+                    </p>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 mb-3">
+                      {[...Array(product.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-green-500 text-green-500" />
+                      ))}
+                    </div>
+
+                    {/* Stock Status */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <Check className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-bold text-gray-900">In stock</span>
+                    </div>
+
+                    {/* Pricing */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-gray-400 text-sm line-through">
+                        ₹{product.originalPrice.toLocaleString()}
+                      </span>
+                      <span className="text-2xl font-black text-blue-600">
+                        ₹{product.price.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-lg">
+                      Add To Cart
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-20">
-              <div className="text-gray-400 mb-4"><Search className="h-12 w-12 mx-auto" /></div>
-              <h3 className="text-xl font-bold text-gray-800">No products found</h3>
-              <p className="text-gray-500">Try changing your filters or search keywords</p>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Pagination - Simplified */}
-        {totalPages > 1 && (
-          <div className="mt-16 flex justify-center items-center gap-2">
-            <Button
-              variant="outline"
-              disabled={page === 1}
-              onClick={() => handlePageChange(page - 1)}
-              className="rounded-full h-10 w-10 p-0 border-gray-200"
+        {/* Info Banner */}
+        <div className="mt-16 bg-gradient-to-r from-[#048567] to-[#036b52] rounded-3xl p-8 md:p-12 text-white text-center shadow-2xl">
+          <h3 className="text-3xl font-black mb-4 uppercase">
+            Need Help Finding a Part?
+          </h3>
+          <p className="text-white/90 text-lg mb-6 max-w-2xl mx-auto">
+            Our expert team is here to help you find the exact spare part you need.
+            Contact us for personalized assistance.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <a
+              href="https://wa.me/919994999999"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
             >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-
-            <span className="text-sm font-medium px-4">Page {page} of {totalPages}</span>
-
-            <Button
-              variant="outline"
-              disabled={page === totalPages}
-              onClick={() => handlePageChange(page + 1)}
-              className="rounded-full h-10 w-10 p-0 border-gray-200"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.891-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.891-11.891 11.891-2.016 0-3.991-.512-5.747-1.487l-6.049 1.586zm5.839-3.411c1.554.914 3.097 1.383 4.605 1.383 5.461 0 9.904-4.444 9.904-9.905 0-2.639-1.026-5.123-2.894-6.992-1.866-1.868-4.351-2.895-6.99-2.895-5.467 0-9.911 4.444-9.911 9.905 0 1.748.461 3.42 1.332 4.887l-1.054 3.847 4.008-1.05zm10.596-7.513c-.313-.156-1.854-.915-2.145-1.018-.291-.102-.503-.153-.715.156-.213.311-.82 1.018-1.004 1.222-.185.204-.37.228-.684.072-.313-.156-1.323-.488-2.52-1.555-.931-.83-1.558-1.855-1.742-2.167-.184-.313-.02-.482.137-.638.141-.141.313-.365.469-.547.156-.182.209-.313.313-.522.104-.208.052-.39-.026-.547-.078-.157-.715-1.716-.979-2.352-.257-.619-.519-.533-.715-.543-.184-.009-.396-.011-.611-.011-.215 0-.568.081-.864.406-.297.325-1.133 1.106-1.133 2.693 0 1.587 1.156 3.118 1.316 3.328.16.21 2.274 3.472 5.508 4.868.769.331 1.368.528 1.837.677.77.244 1.472.21 2.025.128.618-.092 1.854-.758 2.118-1.468.264-.71.264-1.32.185-1.448-.078-.127-.291-.204-.604-.36z" />
+              </svg>
+              WhatsApp Us
+            </a>
+            <Link
+              href="/contact"
+              className="bg-white/10 backdrop-blur-sm text-white border-2 border-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition-all hover:scale-105"
             >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
+              Contact Support
+            </Link>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* WhatsApp Floating Button */}
+      {/* Floating WhatsApp Button */}
       <a
-        href="https://wa.me/919994999999" // Replace with actual number
+        href="https://wa.me/919994999999"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 bg-[#25d366] text-white p-3.5 rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95"
+        className="fixed bottom-6 right-6 z-50 bg-[#25d366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.891-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.891-11.891 11.891-2.016 0-3.991-.512-5.747-1.487l-6.049 1.586zm5.839-3.411c1.554.914 3.097 1.383 4.605 1.383 5.461 0 9.904-4.444 9.904-9.905 0-2.639-1.026-5.123-2.894-6.992-1.866-1.868-4.351-2.895-6.99-2.895-5.467 0-9.911 4.444-9.911 9.905 0 1.748.461 3.42 1.332 4.887l-1.054 3.847 4.008-1.05zm10.596-7.513c-.313-.156-1.854-.915-2.145-1.018-.291-.102-.503-.153-.715.156-.213.311-.82 1.018-1.004 1.222-.185.204-.37.228-.684.072-.313-.156-1.323-.488-2.52-1.555-.931-.83-1.558-1.855-1.742-2.167-.184-.313-.02-.482.137-.638.141-.141.313-.365.469-.547.156-.182.209-.313.313-.522.104-.208.052-.39-.026-.547-.078-.157-.715-1.716-.979-2.352-.257-.619-.519-.533-.715-.543-.184-.009-.396-.011-.611-.011-.215 0-.568.081-.864.406-.297.325-1.133 1.106-1.133 2.693 0 1.587 1.156 3.118 1.316 3.328.16.21 2.274 3.472 5.508 4.868.769.331 1.368.528 1.837.677.77.244 1.472.21 2.025.128.618-.092 1.854-.758 2.118-1.468.264-.71.264-1.32.185-1.448-.078-.127-.291-.204-.604-.36z" /></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.891-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.891-11.891 11.891-2.016 0-3.991-.512-5.747-1.487l-6.049 1.586zm5.839-3.411c1.554.914 3.097 1.383 4.605 1.383 5.461 0 9.904-4.444 9.904-9.905 0-2.639-1.026-5.123-2.894-6.992-1.866-1.868-4.351-2.895-6.99-2.895-5.467 0-9.911 4.444-9.911 9.905 0 1.748.461 3.42 1.332 4.887l-1.054 3.847 4.008-1.05zm10.596-7.513c-.313-.156-1.854-.915-2.145-1.018-.291-.102-.503-.153-.715.156-.213.311-.82 1.018-1.004 1.222-.185.204-.37.228-.684.072-.313-.156-1.323-.488-2.52-1.555-.931-.83-1.558-1.855-1.742-2.167-.184-.313-.02-.482.137-.638.141-.141.313-.365.469-.547.156-.182.209-.313.313-.522.104-.208.052-.39-.026-.547-.078-.157-.715-1.716-.979-2.352-.257-.619-.519-.533-.715-.543-.184-.009-.396-.011-.611-.011-.215 0-.568.081-.864.406-.297.325-1.133 1.106-1.133 2.693 0 1.587 1.156 3.118 1.316 3.328.16.21 2.274 3.472 5.508 4.868.769.331 1.368.528 1.837.677.77.244 1.472.21 2.025.128.618-.092 1.854-.758 2.118-1.468.264-.71.264-1.32.185-1.448-.078-.127-.291-.204-.604-.36z" />
+        </svg>
       </a>
-
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 }
