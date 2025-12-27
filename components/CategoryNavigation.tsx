@@ -177,7 +177,7 @@ export default function CategoriesPage() {
             </a>
             <Link
               href="/products"
-              className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-bold hover:bg-white hover:text-[#048567] transition-all hover:scale-105 inline-flex items-center gap-2"
+              className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg inline-flex items-center gap-2"
             >
               View All Products
               <ArrowRight className="w-5 h-5" />
