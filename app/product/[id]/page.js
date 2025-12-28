@@ -13,10 +13,34 @@ export default async function ProductPage({ params }) {
       fetch(`${protocol}://${host}/api/products`, { cache: "no-store" }),
     ]);
 
-    if (!productRes.ok) throw new Error("Product not found");
+    // If product fetch failed, show a friendly not-found UI instead of throwing
+    if (!productRes.ok) {
+      const status = productRes.status;
+      const statusText = productRes.statusText || "";
+
+      // For server errors, show a retryable error message; for 404 show not-found
+      if (status >= 500) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-4">
+            <h2 className="text-2xl font-bold text-red-600 mb-2">Server Error</h2>
+            <p className="text-gray-600 mb-4">There was a problem loading the product details. Please try again later.</p>
+            <a href="/products" className="text-indigo-600 hover:underline font-medium">Back to Shop</a>
+          </div>
+        );
+      }
+
+      // 404 or other client errors
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-4">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h2>
+          <p className="text-gray-600 mb-4">The product you&apos;re looking for might have been removed or the link is incorrect.</p>
+          <a href="/products" className="text-indigo-600 hover:underline font-medium">Back to Shop</a>
+        </div>
+      );
+    }
 
     const productData = await productRes.json();
-    const relatedProducts = await relatedRes.json();
+    const relatedProducts = relatedRes.ok ? await relatedRes.json() : [];
 
     console.log(
       `Detail Page: Fetched product "${productData.product?.name}" (ID: ${id})`

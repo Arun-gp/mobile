@@ -4,8 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import ToastContainerClient from './ToastContainerClient';
 import { Header } from "@/components/Header";
 import Footer from "@/app/Footer/page";
 
@@ -23,7 +22,7 @@ export default function ClientLayout({ children }) {
                 <Header />
                 {children}
                 <Footer />
-                <ToastContainer
+                <ToastContainerClient
                     position="top-right"
                     autoClose={5000}
                     hideProgressBar={false}

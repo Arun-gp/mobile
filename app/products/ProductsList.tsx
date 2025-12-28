@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useSearchParams } from 'next/navigation';
 import { CartContext } from "@/context/CartContext";
-import Link from "next/link";
-import { Search, Laptop, Smartphone, Apple, MonitorSmartphone, Star, Check } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Search, Laptop, Smartphone, Apple, MonitorSmartphone, Heart } from "lucide-react";
 
 interface Product {
   id: number;
@@ -17,10 +16,10 @@ interface Product {
   image: string;
   rating: number;
   inStock: boolean;
-} 
+}
 
 // Sample products for each category
-const allProducts: Product[] = [
+export const allProducts: Product[] = [
   // Laptop Spare Parts
   {
     id: 1,
@@ -222,32 +221,141 @@ const allProducts: Product[] = [
 export default function SparePartsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { addToCart } = useContext(CartContext);
+  const [sortBy, setSortBy] = useState<string>("default");
+  const [likedProducts, setLikedProducts] = useState<number[]>([]);
+  const searchParams = useSearchParams();
+
+  // set selectedCategory from query param when present
+  useEffect(() => {
+    try {
+      const cat = searchParams?.get?.('category') || null;
+      setSelectedCategory(cat);
+    } catch (e) {
+      // ignore
+    }
+  }, [searchParams]);
+
+  // Load liked products from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("likedProducts");
+      if (raw) {
+        const arr = JSON.parse(raw) as number[];
+        setLikedProducts(Array.isArray(arr) ? arr : []);
+      }
+    } catch (e) {
+      console.error("Failed to load liked products:", e);
+    }
+  }, []);
+
+  // Persist liked products to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("likedProducts", JSON.stringify(likedProducts));
+    } catch (e) {
+      console.error("Failed to save liked products:", e);
+    }
+  }, [likedProducts]);
+
+  // Sync likedProducts -> wishlistItems in localStorage and notify header.
+  useEffect(() => {
+    try {
+      const mapped = likedProducts.map(id => {
+        const p = allProducts.find(x => x.id === id);
+        if (!p) return null;
+        return {
+          id: `local-${p.id}`,
+          productId: String(p.id),
+          name: p.name,
+          price: p.price,
+          image: p.image,
+        } as { id: string; productId: string; name: string; price: number; image: string };
+      }).filter((x): x is { id: string; productId: string; name: string; price: number; image: string } => x !== null);
+
+      // dedupe by productId
+      const map = new Map();
+      for (const it of mapped) map.set(String(it.productId), it);
+      const deduped = Array.from(map.values());
+      localStorage.setItem("wishlistItems", JSON.stringify(deduped));
+    } catch (e) {
+      console.error('Failed to sync wishlistItems', e);
+    }
+
+    // dispatch async event so Header updates outside render
+    try {
+      setTimeout(() => { window.dispatchEvent(new Event('wishlistUpdated')); }, 0);
+    } catch (e) {}
+  }, [likedProducts]);
+
+  const toggleLike = (product: Product) => {
+    setLikedProducts((prev) => {
+      const exists = prev.includes(product.id);
+      return exists ? prev.filter((x) => x !== product.id) : [...prev, product.id];
+    });
+  };
+
+  // use CartContext if available so header/cart updates correctly
+  const { addToCart: addToCartCtx } = useContext(CartContext) || {};
+  const addToCart = (product: Product) => {
+    if (typeof addToCartCtx === "function") {
+      addToCartCtx(product, null);
+    } else {
+      // Fallback: store in localStorage cart_guest
+      try {
+        const key = `cart_guest`;
+        const raw = localStorage.getItem(key) || "[]";
+        const arr = Array.isArray(JSON.parse(raw)) ? JSON.parse(raw) : [];
+        const existing = arr.find((i: any) => String(i.productId || i.id) === String(product.id));
+        if (existing) existing.quantity = (existing.quantity || 1) + 1;
+        else arr.push({ id: product.id, productId: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+        localStorage.setItem(key, JSON.stringify(arr));
+      } catch (e) {
+        console.error("cart fallback error", e);
+      }
+    }
+
+    console.log("Added to cart:", product.name);
+  };
 
   // Filter products based on selected category AND search query
-  const filteredProducts = allProducts.filter(product => {
-    // First filter by category if selected
+  let filteredProducts = allProducts.filter(product => {
     const categoryMatch = selectedCategory === null || product.categoryType === selectedCategory;
-    
-    // Then filter by search query if provided
     const searchMatch = searchQuery.trim() === "" || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
     return categoryMatch && searchMatch;
   });
+
+  // Apply sorting
+  if (sortBy === "price-asc") {
+    filteredProducts = filteredProducts.slice().sort((a, b) => a.price - b.price);
+  } else if (sortBy === "price-desc") {
+    filteredProducts = filteredProducts.slice().sort((a, b) => b.price - a.price);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 uppercase tracking-tight">
-            Spare Parts Catalog
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Browse our comprehensive collection of genuine spare parts for all your devices
-          </p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-1 tracking-tight">Products</h1>
+            <p className="text-gray-600 text-sm">Browse our collection of genuine spare parts</p>
+          </div>
+
+          {/* Minimal Sort / Filter UI */}
+          <div className="flex items-center gap-3">
+            <label className="text-xs font-bold text-gray-500 uppercase">Sort:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 border rounded-lg text-sm bg-white"
+            >
+              <option value="default">Recommended</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
         </div>
 
         {/* Search and Filter Section */}
@@ -256,11 +364,11 @@ export default function SparePartsPage() {
             {/* Search Bar */}
             <div className="relative w-full md:w-96 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-[#048567]" />
-              <Input
+              <input
                 placeholder="Search spare parts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 w-full border-2 border-gray-200 rounded-2xl bg-white focus:border-[#048567] transition-all text-base shadow-sm"
+                className="pl-12 pr-4 py-3 w-full border-2 border-gray-200 rounded-2xl bg-white focus:border-[#048567] focus:outline-none transition-all text-base shadow-sm"
               />
             </div>
           </div>
@@ -350,72 +458,73 @@ export default function SparePartsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
+                  className="bg-white rounded-2xl shadow-sm hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 overflow-hidden border border-gray-100 group"
                 >
-                  {/* Product Image */}
-                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    {/* Discount Badge */}
-                    <div className="absolute top-3 left-3">
-                      <div className="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
-                        <span className="text-sm font-black">-{product.discount}%</span>
-                      </div>
-                    </div>
-                    {/* NEW Badge */}
-                    <div className="absolute top-3 right-3">
-                      <span className="bg-black text-white text-xs font-black px-3 py-1 rounded uppercase">
-                        NEW
-                      </span>
-                    </div>
+                  {/* Product Image (no overlay) */}
+                  <div className="h-48 flex items-center justify-center bg-gray-50 overflow-hidden">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105 p-4"
+                      />
+                    ) : null}
                   </div>
 
-                  {/* Product Info */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
-                      {product.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-3 line-clamp-2 leading-relaxed">
-                      {product.category}
-                    </p>
+                  {/* Product Info - Like button placed here so it doesn't overlap the image */}
+                  <div className="p-4 md:p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 line-clamp-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">{product.category}</p>
+                      </div>
 
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 mb-3">
-                      {[...Array(product.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-green-500 text-green-500" />
-                      ))}
+                      <div className="flex-shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleLike(product);
+                          }}
+                          aria-label={likedProducts.includes(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+                          className="flex items-center justify-center w-10 h-10 p-0 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+                        >
+                          <Heart
+                            className={`w-5 h-5 transition-all duration-200 ${
+                              likedProducts.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'
+                            }`}
+                          />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Stock Status */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <Check className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-bold text-gray-900">In stock</span>
-                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-gray-500 text-sm line-through">₹{product.originalPrice.toLocaleString()}</div>
+                        <div className="text-lg md:text-xl font-extrabold text-gray-900">₹{product.price.toLocaleString()}</div>
+                      </div>
 
-                    {/* Pricing */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-gray-400 text-sm line-through">
-                        ₹{product.originalPrice.toLocaleString()}
-                      </span>
-                      <span className="text-2xl font-black text-blue-600">
-                        ₹{product.price.toLocaleString()}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <button
+                          onClick={() => addToCart(product)}
+                          className="bg-[#048567] text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-[#036e56] transition-colors"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => alert(`Viewing ${product.name}`)}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          View
+                        </button>
+                      </div>
                     </div>
-
-                    {/* Add to Cart Button */}
-                    <button
-                      onClick={() => addToCart({ ...product, _id: product.id }, null)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-lg"
-                    >
-                      Add To Cart
-                    </button>
                   </div>
                 </div>
               ))}
@@ -423,42 +532,7 @@ export default function SparePartsPage() {
           )}
         </div>
 
-        {/* Info Banner */}
-        <div className="mt-16 bg-gradient-to-r from-[#048567] to-[#036b52] rounded-3xl p-8 md:p-12 text-blue text-center shadow-2xl">
-          <h3 className="text-3xl font-black mb-4 uppercase">
-            Need Help Finding a Part?
-          </h3>
-          <p className="text-blue/90 text-lg mb-6 max-w-2xl mx-auto">
-            Our expert team is here to help you find the exact spare part you need.
-            Contact us for personalized assistance.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <a
-              href="https://wa.me/919994999999"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.588-5.946 0-6.556 5.332-11.891 11.891-11.891 3.181 0 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.402 0 6.556-5.332 11.891-11.891 11.891-2.016 0-3.991-.512-5.747-1.487l-6.049 1.586zm5.839-3.411c1.554.914 3.097 1.383 4.605 1.383 5.461 0 9.904-4.444 9.904-9.905 0-2.639-1.026-5.123-2.894-6.992-1.866-1.868-4.351-2.895-6.99-2.895-5.467 0-9.911 4.444-9.911 9.905 0 1.748.461 3.42 1.332 4.887l-1.054 3.847 4.008-1.05zm10.596-7.513c-.313-.156-1.854-.915-2.145-1.018-.291-.102-.503-.153-.715.156-.213.311-.82 1.018-1.004 1.222-.185.204-.37.228-.684.072-.313-.156-1.323-.488-2.52-1.555-.931-.83-1.558-1.855-1.742-2.167-.184-.313-.02-.482.137-.638.141-.141.313-.365.469-.547.156-.182.209-.313.313-.522.104-.208.052-.39-.026-.547-.078-.157-.715-1.716-.979-2.352-.257-.619-.519-.533-.715-.543-.184-.009-.396-.011-.611-.011-.215 0-.568.081-.864.406-.297.325-1.133 1.106-1.133 2.693 0 1.587 1.156 3.118 1.316 3.328.16.21 2.274 3.472 5.508 4.868.769.331 1.368.528 1.837.677.77.244 1.472.21 2.025.128.618-.092 1.854-.758 2.118-1.468.264-.71.264-1.32.185-1.448-.078-.127-.291-.204-.604-.36z" />
-              </svg>
-              WhatsApp Us
-            </a>
-            <Link
-              href="/contact"
-               className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
-            
-            >
-              Contact Support
-            </Link>
-          </div>
-        </div>
+        {/* Info Banner removed per request */}
       </div>
 
       {/* Floating WhatsApp Button */}

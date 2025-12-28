@@ -61,7 +61,7 @@ export default function CartPage() {
         <div className="grid lg:grid-cols-3 gap-10">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cart.map((item) => {
+            {cart.map((item, idx) => {
               const selectedSizePrice = item?.sizes?.[item.selectedSize]?.price ?? item?.price ?? 0;
               const discountPct = typeof item?.discountPercentage === 'number' ? item.discountPercentage : 0;
               const discountPrice = selectedSizePrice - (selectedSizePrice * (discountPct / 100));
@@ -69,7 +69,7 @@ export default function CartPage() {
 
               return (
                 <div
-                  key={`${item._id}-${item.selectedSize}`}
+                  key={`cart-${item._id ?? item.id ?? item.productId ?? idx}-${String(item.selectedSize ?? 'none')}`}
                   className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-6"
                 >
                   <div className="relative w-24 h-32 flex-shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100">

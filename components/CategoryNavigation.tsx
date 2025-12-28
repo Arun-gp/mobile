@@ -99,8 +99,9 @@ export default function CategoriesPage() {
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6">
             {categories.map((category) => (
-              <button
+              <Link
                 key={category.id}
+                href={`/products?category=${encodeURIComponent(category.id)}`}
                 onClick={() => setSelectedCategory(category.id)}
                 className={`group flex flex-col items-center text-center transition-all duration-300 ${
                   selectedCategory === category.id ? 'scale-105' : 'hover:scale-105'
@@ -127,7 +128,7 @@ export default function CategoriesPage() {
                 <div className={`mt-2 h-1 w-6 rounded-full transition-all ${
                   selectedCategory === category.id ? 'bg-[#048567]' : 'bg-transparent'
                 }`} />
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -166,15 +167,13 @@ export default function CategoriesPage() {
             Can't find what you're looking for? Contact our support team for personalized assistance.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <a
-              href="https://wa.me/919994999999"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/contact"
               className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg inline-flex items-center gap-2"
             >
               Contact Support
               <ArrowRight className="w-5 h-5" />
-            </a>
+            </Link>
             <Link
               href="/products"
               className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg inline-flex items-center gap-2"

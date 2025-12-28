@@ -15,6 +15,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginDisabled, setLoginDisabled] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,9 +60,14 @@ export default function LoginForm() {
         errorMessage = "Incorrect password.";
       } else if (error.code === 'auth/too-many-requests') {
         errorMessage = "Too many failed attempts. Please try again later.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "Email/Password sign-in is not enabled for this Firebase project.";
+        setLoginDisabled(true);
       }
 
-      toast.error(errorMessage);
+      toast.error(
+        `${errorMessage} To enable Email/Password sign-in: Firebase Console → Authentication → Sign-in method → enable 'Email/Password'. If you don't manage the Firebase project, contact the site administrator.`
+      );
     } finally {
       setLoading(false);
     }
@@ -85,6 +91,12 @@ export default function LoginForm() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-12 px-6 shadow-2xl rounded-[3rem] border border-gray-100 sm:px-12 mx-4 sm:mx-0">
+          {loginDisabled && (
+            <div className="mb-6 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-yellow-800 text-sm">
+              Email/Password sign-in is currently disabled for this project. Enable it in Firebase Console → Authentication → Sign-in method → enable "Email/Password".
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
@@ -137,7 +149,7 @@ export default function LoginForm() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || loginDisabled}
               className="w-full flex justify-center py-5 px-4 border border-transparent rounded-2xl shadow-xl text-sm font-black text-white bg-[#0066cc] hover:bg-[#0052a3] focus:outline-none transition-all transform hover:scale-[1.02] active:scale-100 uppercase tracking-widest disabled:opacity-50"
             >
               {loading ? "AUTHENTICATING..." : "SIGN IN NOW"}

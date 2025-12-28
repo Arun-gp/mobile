@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 export default function UserForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [signupDisabled, setSignupDisabled] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -54,12 +55,17 @@ export default function UserForm() {
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = "Please enter a valid email address.";
       } else if (error.code === 'auth/operation-not-allowed') {
-        errorMessage = "Email/Password registration is not enabled. Please contact support.";
+        errorMessage = "Email/Password registration is not enabled for this project.";
+        // disable further attempts and surface actionable guidance to the developer/admin
+        setSignupDisabled(true);
       } else {
         errorMessage = error.message; // Show the raw error message if it's unknown
       }
 
-      toast.error(errorMessage);
+      // Provide a more descriptive toast for admins/developers
+      toast.error(
+        `${errorMessage} To enable: Firebase Console → Authentication → Sign-in method → enable 'Email/Password'. If you don't manage the Firebase project, contact the site administrator.`
+      );
     } finally {
       setLoading(false);
     }
