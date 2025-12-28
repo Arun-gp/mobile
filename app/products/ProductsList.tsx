@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { CartContext } from "@/context/CartContext";
 import Link from "next/link";
 import { Search, Laptop, Smartphone, Apple, MonitorSmartphone, Star, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -221,6 +222,7 @@ const allProducts: Product[] = [
 export default function SparePartsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { addToCart } = useContext(CartContext);
 
   // Filter products based on selected category AND search query
   const filteredProducts = allProducts.filter(product => {
@@ -408,7 +410,10 @@ export default function SparePartsPage() {
                     </div>
 
                     {/* Add to Cart Button */}
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-lg">
+                    <button
+                      onClick={() => addToCart({ ...product, _id: product.id }, null)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-lg"
+                    >
                       Add To Cart
                     </button>
                   </div>

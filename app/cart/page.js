@@ -20,8 +20,9 @@ export default function CartPage() {
 
   const totalQuantity = cart.reduce((total, item) => total + item.quantity, 0);
   const totalPrice = cart.reduce((total, item) => {
-    const selectedSizePrice = item.sizes[item.selectedSize]?.price || item.price;
-    const discountPrice = selectedSizePrice - (selectedSizePrice * (item.discountPercentage / 100));
+    const selectedSizePrice = item?.sizes?.[item.selectedSize]?.price ?? item?.price ?? 0;
+    const discountPct = typeof item?.discountPercentage === 'number' ? item.discountPercentage : 0;
+    const discountPrice = selectedSizePrice - (selectedSizePrice * (discountPct / 100));
     return total + discountPrice * item.quantity;
   }, 0);
 
@@ -61,9 +62,10 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cart.map((item) => {
-              const selectedSizePrice = item.sizes[item.selectedSize]?.price || item.price;
-              const discountPrice = selectedSizePrice - (selectedSizePrice * (item.discountPercentage / 100));
-              const imageUrl = Array.isArray(item.image) ? item.image[0] : item.image;
+              const selectedSizePrice = item?.sizes?.[item.selectedSize]?.price ?? item?.price ?? 0;
+              const discountPct = typeof item?.discountPercentage === 'number' ? item.discountPercentage : 0;
+              const discountPrice = selectedSizePrice - (selectedSizePrice * (discountPct / 100));
+              const imageUrl = Array.isArray(item?.image) ? item.image[0] : item?.image;
 
               return (
                 <div
@@ -88,7 +90,7 @@ export default function CartPage() {
                       )}
                     </div>
                     <div className="inline-block mt-3 bg-gray-100 px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest text-gray-500">
-                      Size: {item.selectedSize}
+                      Size: {item.selectedSize ?? 'N/A'}
                     </div>
                   </div>
 
@@ -102,7 +104,7 @@ export default function CartPage() {
                       </button>
                       <span className="w-10 text-center font-bold text-gray-900">{item.quantity}</span>
                       <button
-                        onClick={() => handleIncreaseQuantity(item._id, item.selectedSize, item.sizes[item.selectedSize]?.stock)}
+                        onClick={() => handleIncreaseQuantity(item._id, item.selectedSize, item?.sizes?.[item.selectedSize]?.stock ?? Infinity)}
                         className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg transition-all"
                       >
                         <Plus className="w-4 h-4 text-gray-600" />

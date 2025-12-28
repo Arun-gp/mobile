@@ -104,7 +104,7 @@ export function Header() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/products?query=${encodeURIComponent(searchQuery)}`);
+      router.push(`/SearchFilter?query=${encodeURIComponent(searchQuery)}`);
       setSearchQuery("");
     }
   };

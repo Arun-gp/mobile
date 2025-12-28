@@ -13,10 +13,8 @@ export const CartProvider = ({ children }) => {
   // Get the userId from localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedUserId = localStorage.getItem('userId');
-      if (savedUserId) {
-        setUserId(savedUserId);
-      }
+      const savedUserId = localStorage.getItem('userId') || 'guest';
+      setUserId(savedUserId);
     }
   }, []);
 
@@ -32,20 +30,27 @@ export const CartProvider = ({ children }) => {
 
   // Get the price for a specific size
   const getPriceForSize = (product, size) => {
-    return product.sizes[size]?.price || product.price; // Fallback to base price if no specific size price is set
+    return product?.sizes?.[size]?.price || product?.price || 0; // Fallback to base price if no specific size price is set
   };
 
   // Add product to the cart
   const addToCart = (product, size) => {
-    const productPrice = getPriceForSize(product, size);
-    const existingProduct = cart.find(item => item._id === product._id && item.selectedSize === size);
-    const productStock = product.sizes[size];
+    // Normalize id (support product._id or product.id)
+    const id = product._id || product.id || product._id === 0 ? product._id : product.id;
+    const normalizedProduct = { ...product, _id: id };
+
+    const productPrice = getPriceForSize(normalizedProduct, size);
+
+    // Determine available stock gracefully
+    const productStock = normalizedProduct?.sizes?.[size]?.stock ?? normalizedProduct?.stock ?? Infinity;
+
+    const existingProduct = cart.find(item => item._id === normalizedProduct._id && item.selectedSize === size);
 
     if (existingProduct) {
       // If the product is already in the cart, increase its quantity if it's not out of stock
       if (existingProduct.quantity < productStock) {
         const updatedCart = cart.map(item => {
-          if (item._id === product._id && item.selectedSize === size) {
+          if (item._id === normalizedProduct._id && item.selectedSize === size) {
             return { ...item, quantity: item.quantity + 1 };
           }
           return item;
@@ -55,7 +60,7 @@ export const CartProvider = ({ children }) => {
       }
     } else {
       // Add the new product to the cart
-      const updatedCart = [...cart, { ...product, selectedSize: size, quantity: 1, price: productPrice }];
+      const updatedCart = [...cart, { ...normalizedProduct, selectedSize: size ?? null, quantity: 1, price: productPrice }];
       setCart(updatedCart);
       localStorage.setItem(`cart_${userId}`, JSON.stringify(updatedCart));
     }

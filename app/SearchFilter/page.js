@@ -1,11 +1,13 @@
 "use client"
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ProductsPage({ searchParams }) {
   const router = useRouter();
-  const query = searchParams.query || '';
-  const categoryFromUrl = searchParams.category || '';
+  // `searchParams` is a server-side promise — unwrap it in the client with `React.use`
+  const params = React.use(searchParams);
+  const query = params?.query || '';
+  const categoryFromUrl = params?.category || '';
   const [category, setCategory] = useState(categoryFromUrl);
   const [page, setPage] = useState(1);
   const [productsData, setProductsData] = useState({ products: [], totalProducts: 0 });
