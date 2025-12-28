@@ -1,7 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ArrowRight, Sparkles, ShoppingBag, Smartphone, Cpu, Battery, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -51,6 +52,7 @@ const HeroSection = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const totalSlides = carouselItems.length;
 
+    // Auto-advance carousel
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -58,11 +60,23 @@ const HeroSection = () => {
         return () => clearInterval(timer);
     }, [totalSlides]);
 
-    const goToSlide = (index) => setCurrentSlide(index);
-    const goToPrevSlide = () =>
+    // Navigation handlers with useCallback for optimization
+    const goToSlide = useCallback((index) => {
+        setCurrentSlide(index);
+    }, []);
+
+    const goToPrevSlide = useCallback(() => {
         setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-    const goToNextSlide = () =>
+    }, [totalSlides]);
+
+    const goToNextSlide = useCallback(() => {
         setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, [totalSlides]);
+
+    // Handle navigation to products page
+    const handleShopNow = useCallback(() => {
+        router.push("/products");
+    }, [router]);
 
     return (
         <section className="relative overflow-hidden">
@@ -71,10 +85,11 @@ const HeroSection = () => {
                 {carouselItems.map((item, index) => (
                     <div
                         key={index}
-                        className={`absolute inset-0 transition-all duration-1000 ease-out ${currentSlide === index
-                            ? "opacity-100 z-10 scale-100"
-                            : "opacity-0 z-0 scale-105"
-                            }`}
+                        className={`absolute inset-0 transition-all duration-1000 ease-out ${
+                            currentSlide === index
+                                ? "opacity-100 z-10 scale-100"
+                                : "opacity-0 z-0 scale-105"
+                        }`}
                     >
                         {/* Background Image */}
                         <Image
@@ -83,6 +98,7 @@ const HeroSection = () => {
                             fill
                             className="object-cover"
                             priority={index === 0}
+                            quality={90}
                         />
 
                         {/* Gradient Overlay */}
@@ -95,8 +111,9 @@ const HeroSection = () => {
                                 <div className="max-w-2xl">
                                     {/* Subtitle Badge */}
                                     <div
-                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium mb-6 transform transition-all duration-700 delay-100 ${currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-                                            }`}
+                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium mb-6 transform transition-all duration-700 delay-100 ${
+                                            currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                                        }`}
                                     >
                                         <Smartphone className="w-4 h-4" />
                                         {item.subtitle}
@@ -104,27 +121,30 @@ const HeroSection = () => {
 
                                     {/* Title */}
                                     <h1
-                                        className={`text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 transform transition-all duration-700 delay-200 ${currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                                            }`}
+                                        className={`text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 transform transition-all duration-700 delay-200 ${
+                                            currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                                        }`}
                                     >
                                         {item.title}
                                     </h1>
 
                                     {/* Description */}
                                     <p
-                                        className={`text-lg md:text-xl text-white/90 max-w-lg mb-8 transform transition-all duration-700 delay-300 ${currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                                            }`}
+                                        className={`text-lg md:text-xl text-white/90 max-w-lg mb-8 transform transition-all duration-700 delay-300 ${
+                                            currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                                        }`}
                                     >
                                         {item.description}
                                     </p>
 
                                     {/* CTA Buttons */}
                                     <div
-                                        className={`flex flex-col sm:flex-row gap-4 transform transition-all duration-700 delay-400 ${currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                                            }`}
+                                        className={`flex flex-col sm:flex-row gap-4 transform transition-all duration-700 delay-400 ${
+                                            currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                                        }`}
                                     >
                                         <Button
-                                            onClick={() => router.push("/products")}
+                                            onClick={handleShopNow}
                                             size="lg"
                                             className="bg-[#0066cc] text-white hover:bg-[#0052a3] font-bold px-10 py-7 rounded-full shadow-2xl transition-all duration-500 transform hover:scale-105 group border-0"
                                         >
@@ -133,10 +153,10 @@ const HeroSection = () => {
                                             <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-2 transition-transform" />
                                         </Button>
                                         <Button
-                                            onClick={() => router.push("/products")}
+                                            onClick={handleShopNow}
                                             variant="outline"
                                             size="lg"
-                                            className="bg-[#0066cc] text-white hover:bg-[#0052a3] hover:text-[#ffffff] font-bold px-10 py-7 rounded-full backdrop-blur-md transition-all duration-500 transform hover:scale-105"
+                                            className="bg-[#0066cc] text-white hover:bg-[#0052a3] hover:text-[#ffffff] font-bold px-10 py-7 rounded-full backdrop-blur-md transition-all duration-500 transform hover:scale-105 border-0"
                                         >
                                             VIEW ALL PARTS
                                         </Button>
@@ -154,8 +174,10 @@ const HeroSection = () => {
                     <button
                         key={index}
                         onClick={() => goToSlide(index)}
-                        className={`relative h-3 rounded-full transition-all duration-500 overflow-hidden ${currentSlide === index ? "w-12 bg-white" : "w-3 bg-white/40 hover:bg-white/60"
-                            }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                        className={`relative h-3 rounded-full transition-all duration-500 overflow-hidden ${
+                            currentSlide === index ? "w-12 bg-white" : "w-3 bg-white/40 hover:bg-white/60"
+                        }`}
                     >
                         {currentSlide === index && (
                             <span
@@ -169,8 +191,9 @@ const HeroSection = () => {
 
             {/* Navigation Arrows */}
             <button
-                className="absolute top-1/2 left-6 z-30 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none"
+                className="absolute top-1/2 left-6 z-30 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50"
                 onClick={goToPrevSlide}
+                aria-label="Previous slide"
             >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -178,8 +201,9 @@ const HeroSection = () => {
             </button>
 
             <button
-                className="absolute top-1/2 right-6 z-30 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none"
+                className="absolute top-1/2 right-6 z-30 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50"
                 onClick={goToNextSlide}
+                aria-label="Next slide"
             >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

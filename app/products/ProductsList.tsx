@@ -447,7 +447,8 @@ export default function SparePartsPage() {
             </a>
             <Link
               href="/contact"
-              className="bg-white/10 backdrop-blur-sm text-white border-2 border-white px-8 py-4 rounded-full font-bold hover:bg-white/20 transition-all hover:scale-105"
+               className="bg-white text-[#048567] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
+            
             >
               Contact Support
             </Link>

@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { UserLogout } from "@/app/action/loginAction";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from 'next/navigation';
 import {
   User,
@@ -17,24 +16,19 @@ import {
   Package,
   Heart,
   Smartphone,
-  ChevronDown,
   Search
 } from "lucide-react";
 import { CartContext } from "@/context/CartContext";
-import { Button } from "@/components/ui/button";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const pathname = usePathname();
   const { cart } = useContext(CartContext);
   const dropdownRef = useRef(null);
-  const mobileMenuRef = useRef(null);
 
-  // Use state for user data to ensure proper re-rendering
   const [user, setUser] = useState({
     isLoggedIn: false,
     profilePicture: null,
@@ -42,7 +36,7 @@ export function Header() {
     userName: null,
   });
 
-  // Check localStorage for user data on mount and when pathname changes
+  // Check auth on mount and pathname change
   useEffect(() => {
     const checkAuth = () => {
       if (typeof window !== "undefined") {
@@ -57,11 +51,34 @@ export function Header() {
     };
 
     checkAuth();
-
-    // Also listen for storage events (for cross-tab sync)
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
   }, [pathname]);
+
+  // Auto-close dropdowns on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setDropdownVisible(false);
+  }, [pathname]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownVisible(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : 'unset';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   const cartItemCount = cart.reduce((count, item) => count + item.quantity, 0);
   const cartTotalPrice = cart.reduce((total, item) => {
@@ -69,39 +86,6 @@ export function Header() {
     const discountPrice = selectedSizePrice - (selectedSizePrice * ((item.discountPercentage || 0) / 100));
     return total + (discountPrice * item.quantity);
   }, 0);
-
-  // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Handle click outside for dropdowns
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownVisible(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Prevent scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [mobileMenuOpen]);
 
   const logout = async () => {
     const result = await UserLogout();
@@ -121,12 +105,22 @@ export function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/products?query=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
     }
   };
 
+  // Navigation links - FIXED: Using correct property names matching your folder structure
+  const navLinks = [
+    { href: "/", label: "HOME" },
+    { href: "/products", label: "ALL PARTS" },
+    { href: "/about-us", label: "ABOUT US" },
+    { href: "/contact", label: "CONTACT US" },
+    { href: "/track-order", label: "TRACK ORDER" },
+  ];
+
   return (
     <>
-      <div className="w-full z-[60]">
+      <div className="w-full relative z-[60]">
         {/* Top Marquee Bar */}
         <div className="bg-[#ff6600] text-white py-1.5 overflow-hidden whitespace-nowrap">
           <div className="animate-marquee inline-block text-xs font-bold tracking-wider">
@@ -187,16 +181,28 @@ export function Header() {
                         <p className="font-bold text-sm truncate">{user.userName}</p>
                         <p className="text-[10px] text-gray-500 uppercase font-bold">{user.userRole}</p>
                       </div>
-                      <Link href="/profile" className="block px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-3">
+                      <Link 
+                        href="/profile" 
+                        className="px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-3"
+                        onClick={() => setDropdownVisible(false)}
+                      >
                         <UserCircle className="w-4 h-4 text-gray-400" />
                         My Profile
                       </Link>
-                      <Link href="/YourOrder" className="block px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-3">
+                      <Link 
+                        href="/your-orders" 
+                        className="px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-3"
+                        onClick={() => setDropdownVisible(false)}
+                      >
                         <Package className="w-4 h-4 text-gray-400" />
                         Your Orders
                       </Link>
                       {user.userRole === "admin" && (
-                        <Link href="/admin/dashboard" className="block px-4 py-3 text-sm hover:bg-gray-100 font-bold text-purple-600 flex items-center gap-3">
+                        <Link 
+                          href="/admin/dashboard" 
+                          className="px-4 py-3 text-sm hover:bg-gray-100 font-bold text-purple-600 flex items-center gap-3"
+                          onClick={() => setDropdownVisible(false)}
+                        >
                           <LayoutDashboard className="w-4 h-4" />
                           Admin Dashboard
                         </Link>
@@ -235,6 +241,7 @@ export function Header() {
                 <button
                   onClick={() => setMobileMenuOpen(true)}
                   className="md:hidden flex items-center justify-center p-1"
+                  aria-label="Open menu"
                 >
                   <Menu className="w-7 h-7" />
                 </button>
@@ -250,7 +257,7 @@ export function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button type="submit" className="bg-[#0066cc] px-4">
+              <button type="submit" className="bg-[#0066cc] px-4" aria-label="Search">
                 <Search className="w-4 h-4 text-white" />
               </button>
             </form>
@@ -266,17 +273,13 @@ export function Header() {
             </Link>
             <div className="h-4 w-px bg-gray-200"></div>
             <div className="flex items-center gap-6">
-              {[
-                { href: "/", label: "HOME" },
-                { href: "/products", label: "ALL PARTS" },
-                { href: "/aboutus", label: "ABOUT US" },
-                { href: "/contact", label: "CONTACT US" },
-                { href: "/shipping", label: "TRACK ORDER" },
-              ].map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`text-xs font-bold tracking-widest hover:text-[#0066cc] transition-colors ${pathname === link.href ? 'text-[#0066cc]' : 'text-gray-600'}`}
+                  className={`text-xs font-bold tracking-widest hover:text-[#0066cc] transition-colors ${
+                    pathname === link.href ? 'text-[#0066cc]' : 'text-gray-600'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -292,25 +295,21 @@ export function Header() {
           <div className="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl flex flex-col animate-in slide-in-from-left duration-500">
             <div className="p-4 bg-[#0066cc] text-white flex items-center justify-between">
               <span className="font-black text-lg tracking-tighter">MOBILE SPARE</span>
-              <button onClick={() => setMobileMenuOpen(false)}>
+              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto px-2 py-4">
               <div className="flex flex-col gap-1">
-                {[
-                  { href: "/", label: "HOME" },
-                  { href: "/products", label: "ALL PARTS" },
-                  { href: "/aboutus", label: "ABOUT US" },
-                  { href: "/contact", label: "CONTACT US" },
-                  { href: "/shipping", label: "TRACK ORDER" },
-                ].map((link) => (
+                {navLinks.map((link) => (
                   <Link
                     key={link.label}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 text-sm font-bold border-b border-gray-50 hover:bg-gray-50 transition-colors uppercase"
+                    className={`px-4 py-3 text-sm font-bold border-b border-gray-50 hover:bg-gray-50 transition-colors uppercase ${
+                      pathname === link.href ? 'bg-blue-50 text-[#0066cc]' : ''
+                    }`}
                   >
                     {link.label}
                   </Link>
