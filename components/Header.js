@@ -34,6 +34,7 @@ export function Header() {
   const wishlistRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [mobileTab, setMobileTab] = useState('MENU');
 
   // derive categories and subitems from allProducts
   const categories = (() => {
@@ -455,32 +456,93 @@ export function Header() {
       )}
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer with Tabs */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl flex flex-col animate-in slide-in-from-left duration-500">
-            <div className="p-4 bg-[#0066cc] text-white flex items-center justify-between">
-              <span className="font-black text-lg tracking-tighter">MOBILE SPARE</span>
-              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
-                <X className="w-6 h-6" />
-              </button>
+          <div className="fixed inset-y-0 left-0 w-80 max-w-full sm:w-72 bg-white shadow-2xl flex flex-col animate-in slide-in-from-left duration-500">
+            <div className="p-4 bg-[#0066cc] text-white">
+              <div className="flex items-center justify-between">
+                <span className="font-black text-lg tracking-tighter">MOBILE SPARE</span>
+                <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="mt-3 bg-white rounded-lg p-1 flex items-center gap-1 text-sm text-gray-700">
+                <button
+                  onClick={() => setMobileTab('CATEGORIES')}
+                  className={`flex-1 px-3 py-2 rounded-lg font-bold ${mobileTab === 'CATEGORIES' ? 'bg-[#0066cc] text-white' : 'bg-white text-[#333]'}`}
+                >
+                  CATEGORIES
+                </button>
+                <button
+                  onClick={() => setMobileTab('MENU')}
+                  className={`flex-1 px-3 py-2 rounded-lg font-bold ${mobileTab === 'MENU' ? 'bg-[#0066cc] text-white' : 'bg-white text-[#333]'}`}
+                >
+                  MENU
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-2 py-4">
-              <div className="flex flex-col gap-1">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`px-4 py-3 text-sm font-bold border-b border-gray-50 hover:bg-gray-50 transition-colors uppercase ${
-                      pathname === link.href ? 'bg-blue-50 text-[#0066cc]' : ''
-                    }`}
+            <div className="flex-1 overflow-y-auto px-3 py-4">
+              {mobileTab === 'MENU' ? (
+                <div className="flex flex-col gap-1">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`w-full text-left px-4 py-3 text-sm font-bold border-b border-gray-50 hover:bg-gray-50 transition-colors uppercase ${
+                        pathname === link.href ? 'bg-blue-50 text-[#0066cc]' : ''
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => { setActiveCategory(null); }}
+                    className="text-xs uppercase text-gray-500 font-bold px-2 pb-1"
                   >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+                    Shop by Category
+                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    {categories.map((cat) => (
+                      <div key={cat.key} className="col-span-1">
+                        <button
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            router.push(`/products?category=${encodeURIComponent(cat.key)}`);
+                          }}
+                          className="w-full text-left px-3 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 font-bold flex items-center gap-3"
+                        >
+                          <img src={iconFor(cat.key)} alt={cat.key} className="w-6 h-6 flex-shrink-0" />
+                          <span className="text-sm truncate">{labelFor(cat.key)}</span>
+                        </button>
+
+                        {(cat.subs || []).length > 0 && (
+                          <div className="mt-1 ml-1 text-xs text-gray-500">
+                            {(cat.subs || []).slice(0,3).map((sub) => (
+                              <button
+                                key={sub}
+                                onClick={() => {
+                                  setMobileMenuOpen(false);
+                                  router.push(`/products?category=${encodeURIComponent(cat.key)}&sub=${encodeURIComponent(sub)}`);
+                                }}
+                                className="block w-full text-left py-1 hover:underline"
+                              >
+                                {sub}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="p-4 border-t bg-gray-50 flex flex-col gap-4">

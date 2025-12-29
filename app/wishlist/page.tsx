@@ -87,43 +87,44 @@ export default function WishlistPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table className="w-full table-auto">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="text-left px-6 py-4 text-sm text-gray-500">Product</th>
-                                <th className="text-left px-6 py-4 text-sm text-gray-500">Price</th>
-                                <th className="text-right px-6 py-4 text-sm text-gray-500">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {wishlist.map((item) => (
-                                <tr key={item.id} className="border-t">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
-                                                <Image src={item.image || '/placeholder.png'} alt={item.name} width={80} height={80} className="object-cover" />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-gray-900 line-clamp-1">{item.name}</div>
-                                                <div className="text-xs text-gray-500">Product ID: {item.productId}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 align-middle">
-                                        <div className="font-black text-gray-900">₹{item.price}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right align-middle">
-                                        <div className="flex items-center justify-end gap-3">
-                                            <button onClick={() => handleAddToCart(item)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition-colors">Add to Cart</button>
-                                            <button onClick={() => removeFromWishlist(item.id)} className="text-sm text-gray-500 hover:text-red-600 flex items-center gap-2">
+                    <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 p-4">
+                        {wishlist.map((item) => (
+                            <li key={item.id} className="bg-white rounded-lg border border-gray-50 shadow-sm overflow-hidden flex flex-col">
+                                <div className="w-full h-48 sm:h-40 md:h-44 lg:h-40 overflow-hidden bg-gray-50">
+                                    <Image src={item.image || '/placeholder.png'} alt={item.name} width={600} height={400} className="object-cover w-full h-full" />
+                                </div>
+
+                                <div className="p-4 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <div className="font-bold text-gray-900 truncate">{item.name}</div>
+                                        <div className="text-xs text-gray-500 mt-1 truncate-break">Product ID: {item.productId}</div>
+                                    </div>
+
+                                    <div className="mt-4 flex items-center justify-between gap-3">
+                                        <div className="font-black text-gray-900 text-lg">₹{item.price}</div>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleAddToCart(item)}
+                                                aria-label={`Add ${item.name} to cart`}
+                                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors"
+                                            >
+                                                Add to Cart
+                                            </button>
+
+                                            <button
+                                                onClick={() => removeFromWishlist(item.id)}
+                                                aria-label={`Remove ${item.name} from wishlist`}
+                                                className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
+                                            >
                                                 <Trash2 className="w-4 h-4" /> Remove
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
         </div>
