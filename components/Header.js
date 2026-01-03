@@ -187,10 +187,12 @@ export function Header() {
     <>
       <div className="w-full relative z-[60]">
         {/* Top Marquee Bar */}
-        <div className="bg-[#ff6600] text-white py-1.5 overflow-hidden whitespace-nowrap">
-          <div className="animate-marquee inline-block text-xs font-bold tracking-wider">
-            ⚡ Quality Mobile Spare Parts | Fast Delivery | Genuine Products | Bulk Orders Welcome ⚡ &nbsp;&nbsp;&nbsp;
-            ⚡ Quality Mobile Spare Parts | Fast Delivery | Genuine Products | Bulk Orders Welcome ⚡
+        <div className="bg-[#ff6600] text-white py-1.5 overflow-hidden">
+          <div className="animate-marquee whitespace-nowrap text-xs font-bold tracking-wider flex">
+            <span className="px-4">⚡ Quality Mobile Spare Parts | Fast Delivery | Genuine Products | Bulk Orders Welcome ⚡</span>
+            <span className="px-4">⚡ Quality Mobile Spare Parts | Fast Delivery | Genuine Products | Bulk Orders Welcome ⚡</span>
+            <span className="px-4">⚡ Quality Mobile Spare Parts | Fast Delivery | Genuine Products | Bulk Orders Welcome ⚡</span>
+            <span className="px-4">⚡ Quality Mobile Spare Parts | Fast Delivery | Genuine Products | Bulk Orders Welcome ⚡</span>
           </div>
         </div>
 
@@ -246,16 +248,16 @@ export function Header() {
                         <p className="font-bold text-sm truncate">{user.userName}</p>
                         <p className="text-[10px] text-gray-500 uppercase font-bold">{user.userRole}</p>
                       </div>
-                      <Link 
-                        href="/profile" 
+                      <Link
+                        href="/profile"
                         className="px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-3"
                         onClick={() => setDropdownVisible(false)}
                       >
                         <UserCircle className="w-4 h-4 text-gray-400" />
                         My Profile
                       </Link>
-                      <Link 
-                        href="/your-orders" 
+                      <Link
+                        href="/your-orders"
                         className="px-4 py-3 text-sm hover:bg-gray-100 flex items-center gap-3"
                         onClick={() => setDropdownVisible(false)}
                       >
@@ -263,8 +265,8 @@ export function Header() {
                         Your Orders
                       </Link>
                       {user.userRole === "admin" && (
-                        <Link 
-                          href="/admin/dashboard" 
+                        <Link
+                          href="/admin/dashboard"
                           className="px-4 py-3 text-sm hover:bg-gray-100 font-bold text-purple-600 flex items-center gap-3"
                           onClick={() => setDropdownVisible(false)}
                         >
@@ -378,9 +380,8 @@ export function Header() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`text-xs font-bold tracking-widest hover:text-[#0066cc] transition-colors ${
-                    pathname === link.href ? 'text-[#0066cc]' : 'text-gray-600'
-                  }`}
+                  className={`text-xs font-bold tracking-widest hover:text-[#0066cc] transition-colors ${pathname === link.href ? 'text-[#0066cc]' : 'text-gray-600'
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -389,71 +390,71 @@ export function Header() {
           </div>
         </nav>
 
-      {/* Category Sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-[120] flex">
-          <div className="w-96 bg-white rounded-l-3xl border-r border-gray-100 shadow-lg overflow-hidden">
-            <div className="bg-[#0066cc] text-white rounded-t-3xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Menu className="w-5 h-5" />
-                <span className="font-black text-sm tracking-tight">SHOP BY CATEGORY</span>
-              </div>
-              <button onClick={() => setSidebarOpen(false)} aria-label="Close" className="p-2 rounded hover:bg-white/10 transition">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-4 overflow-y-auto" onMouseLeave={() => setActiveCategory(null)}>
-              <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-1">
-                <ul className="space-y-2">
-                  {categories.map(cat => (
-                    <li key={cat.key}>
-                      <button
-                        onMouseEnter={() => setActiveCategory(cat.key)}
-                        onFocus={() => setActiveCategory(cat.key)}
-                        onClick={() => setActiveCategory(cat.key)}
-                        className={`w-full text-left px-3 py-2 rounded-md transition-colors duration-150 flex items-center gap-3 text-gray-600 hover:text-[#0066cc] ${activeCategory === cat.key ? 'bg-gray-100 font-bold text-[#0066cc]' : 'hover:bg-gray-50'}`}
-                      >
-                        <img src={iconFor(cat.key)} alt={labelFor(cat.key)} className="w-5 h-5 flex-shrink-0" />
-                        <span className="text-sm">{labelFor(cat.key)}</span>
-                        <ChevronRight className="w-4 h-4 ml-auto text-gray-400" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+        {/* Category Sidebar */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-[120] flex">
+            <div className="w-96 bg-white rounded-l-3xl border-r border-gray-100 shadow-lg overflow-hidden">
+              <div className="bg-[#0066cc] text-white rounded-t-3xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Menu className="w-5 h-5" />
+                  <span className="font-black text-sm tracking-tight">SHOP BY CATEGORY</span>
+                </div>
+                <button onClick={() => setSidebarOpen(false)} aria-label="Close" className="p-2 rounded hover:bg-white/10 transition">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className={`col-span-1 border-l pl-4 transition-all duration-200 ${activeCategory ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}`}>
-                {activeCategory && (
-                  <div className="bg-white">
-                    <h4 className="font-black mb-2">Related Parts</h4>
-                    <ul className="space-y-2 text-sm">
-                      {(categories.find(c => c.key === activeCategory)?.subs || []).map(sub => (
-                        <li key={sub}>
+              <div className="p-4 overflow-y-auto" onMouseLeave={() => setActiveCategory(null)}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-1">
+                    <ul className="space-y-2">
+                      {categories.map(cat => (
+                        <li key={cat.key}>
                           <button
-                            onClick={() => {
-                              setSidebarOpen(false);
-                              router.push(`/products?category=${encodeURIComponent(activeCategory)}&sub=${encodeURIComponent(sub)}`);
-                            }}
-                            className="w-full text-left px-2 py-1 rounded-md hover:bg-gray-50 transition-colors duration-150 text-gray-600 hover:text-[#0066cc] flex items-center justify-between"
+                            onMouseEnter={() => setActiveCategory(cat.key)}
+                            onFocus={() => setActiveCategory(cat.key)}
+                            onClick={() => setActiveCategory(cat.key)}
+                            className={`w-full text-left px-3 py-2 rounded-md transition-colors duration-150 flex items-center gap-3 text-gray-600 hover:text-[#0066cc] ${activeCategory === cat.key ? 'bg-gray-100 font-bold text-[#0066cc]' : 'hover:bg-gray-50'}`}
                           >
-                            <span>{sub}</span>
-                            <ChevronRight className="w-4 h-4 text-gray-300" />
+                            <img src={iconFor(cat.key)} alt={labelFor(cat.key)} className="w-5 h-5 flex-shrink-0" />
+                            <span className="text-sm">{labelFor(cat.key)}</span>
+                            <ChevronRight className="w-4 h-4 ml-auto text-gray-400" />
                           </button>
                         </li>
                       ))}
                     </ul>
                   </div>
-                )}
+
+                  <div className={`col-span-1 border-l pl-4 transition-all duration-200 ${activeCategory ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}`}>
+                    {activeCategory && (
+                      <div className="bg-white">
+                        <h4 className="font-black mb-2">Related Parts</h4>
+                        <ul className="space-y-2 text-sm">
+                          {(categories.find(c => c.key === activeCategory)?.subs || []).map(sub => (
+                            <li key={sub}>
+                              <button
+                                onClick={() => {
+                                  setSidebarOpen(false);
+                                  router.push(`/products?category=${encodeURIComponent(activeCategory)}&sub=${encodeURIComponent(sub)}`);
+                                }}
+                                className="w-full text-left px-2 py-1 rounded-md hover:bg-gray-50 transition-colors duration-150 text-gray-600 hover:text-[#0066cc] flex items-center justify-between"
+                              >
+                                <span>{sub}</span>
+                                <ChevronRight className="w-4 h-4 text-gray-300" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-            </div>
-          </div>
 
-          <div className="flex-1" onClick={() => setSidebarOpen(false)}></div>
-        </div>
-      )}
+            <div className="flex-1" onClick={() => setSidebarOpen(false)}></div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Drawer with Tabs */}
@@ -492,9 +493,8 @@ export function Header() {
                       key={link.label}
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`w-full text-left px-4 py-3 text-sm font-bold border-b border-gray-50 hover:bg-gray-50 transition-colors uppercase ${
-                        pathname === link.href ? 'bg-blue-50 text-[#0066cc]' : ''
-                      }`}
+                      className={`w-full text-left px-4 py-3 text-sm font-bold border-b border-gray-50 hover:bg-gray-50 transition-colors uppercase ${pathname === link.href ? 'bg-blue-50 text-[#0066cc]' : ''
+                        }`}
                     >
                       {link.label}
                     </Link>
@@ -524,7 +524,7 @@ export function Header() {
 
                         {(cat.subs || []).length > 0 && (
                           <div className="mt-1 ml-1 text-xs text-gray-500">
-                            {(cat.subs || []).slice(0,3).map((sub) => (
+                            {(cat.subs || []).slice(0, 3).map((sub) => (
                               <button
                                 key={sub}
                                 onClick={() => {
@@ -578,8 +578,8 @@ export function Header() {
         }
         .animate-marquee {
           animation: marquee 35s linear infinite;
-          display: inline-block;
-          padding-left: 50%;
+          display: flex;
+          width: fit-content;
         }
       `}</style>
     </>

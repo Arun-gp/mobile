@@ -168,21 +168,27 @@
    - Explicit breakpoints for small devices
 ========================= */
 @layer base {
+
   /* prevent accidental horizontal scroll on phones */
-  html, body {
+  html,
+  body {
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
 
   /* Make all images responsive by default */
-  img, .responsive-img {
+  img,
+  .responsive-img {
     max-width: 100%;
     height: auto;
     display: block;
   }
 
   /* Ensure tappable controls meet 44x44pt minimum touch target */
-  button, a.button, .btn, .btn-touch {
+  button,
+  a.button,
+  .btn,
+  .btn-touch {
     min-height: 44px;
     min-width: 44px;
     padding: 0.5rem 0.75rem;
@@ -192,23 +198,47 @@
 
 /* Explicit mobile-first breakpoints */
 @media (max-width: 320px) {
-  :root { font-size: 14px; }
-  .container { padding-left: 0.75rem; padding-right: 0.75rem; }
+  :root {
+    font-size: 14px;
+  }
+
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }
 
 @media (max-width: 480px) {
-  :root { font-size: 15px; }
-  button, .btn, .btn-touch { padding: 0.6rem 0.9rem; }
-  .text-3xl { font-size: 1.6rem; }
+  :root {
+    font-size: 15px;
+  }
+
+  button,
+  .btn,
+  .btn-touch {
+    padding: 0.6rem 0.9rem;
+  }
+
+  .text-3xl {
+    font-size: 1.6rem;
+  }
 }
 
 @media (max-width: 768px) {
-  :root { font-size: 16px; }
-  .container { padding-left: 1rem; padding-right: 1rem; }
+  :root {
+    font-size: 16px;
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  :root { font-size: 16px; }
+  :root {
+    font-size: 16px;
+  }
 }
 
 /* Small utility to avoid overflowing long words/IDs */

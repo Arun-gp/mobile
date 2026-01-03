@@ -37,6 +37,8 @@ export default function WishlistPage() {
             const filtered = wishlist.filter((x) => x.id !== id);
             setWishlist(filtered);
             localStorage.setItem("wishlistItems", JSON.stringify(filtered));
+            // Dispatch event to notify other components
+            window.dispatchEvent(new Event('wishlistUpdated'));
             toast.success("Removed from wishlist");
         } catch (e) {
             toast.error("Failed to remove");

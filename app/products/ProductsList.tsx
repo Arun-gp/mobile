@@ -4,6 +4,7 @@ import { useState, useEffect, useContext } from "react";
 import { useSearchParams } from 'next/navigation';
 import { CartContext } from "@/context/CartContext";
 import { Search, Laptop, Smartphone, Apple, MonitorSmartphone, Heart } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface Product {
   id: number;
@@ -235,17 +236,57 @@ export default function SparePartsPage() {
     }
   }, [searchParams]);
 
-  // Load liked products from localStorage on mount
+  // Load liked products from localStorage on mount and sync with wishlistItems
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("likedProducts");
-      if (raw) {
-        const arr = JSON.parse(raw) as number[];
-        setLikedProducts(Array.isArray(arr) ? arr : []);
+      // First, try to sync from wishlistItems (source of truth from wishlist page)
+      const wishlistRaw = localStorage.getItem("wishlistItems");
+      if (wishlistRaw) {
+        const wishlistItems = JSON.parse(wishlistRaw) as Array<{ productId: string }>;
+        const productIds = wishlistItems.map(item => parseInt(item.productId)).filter(id => !isNaN(id));
+        setLikedProducts(productIds);
+        // Update likedProducts to match
+        localStorage.setItem("likedProducts", JSON.stringify(productIds));
+      } else {
+        // Fallback to likedProducts if wishlistItems doesn't exist
+        const raw = localStorage.getItem("likedProducts");
+        if (raw) {
+          const arr = JSON.parse(raw) as number[];
+          setLikedProducts(Array.isArray(arr) ? arr : []);
+        }
       }
     } catch (e) {
       console.error("Failed to load liked products:", e);
     }
+  }, []);
+
+  // Listen for wishlist updates (e.g., when items are removed from wishlist page)
+  useEffect(() => {
+    const handleWishlistUpdate = () => {
+      try {
+        const wishlistRaw = localStorage.getItem("wishlistItems");
+        if (wishlistRaw) {
+          const wishlistItems = JSON.parse(wishlistRaw) as Array<{ productId: string }>;
+          const productIds = wishlistItems.map(item => parseInt(item.productId)).filter(id => !isNaN(id));
+          setLikedProducts(productIds);
+          localStorage.setItem("likedProducts", JSON.stringify(productIds));
+        } else {
+          // If wishlistItems is empty, clear likedProducts
+          setLikedProducts([]);
+          localStorage.setItem("likedProducts", JSON.stringify([]));
+        }
+      } catch (e) {
+        console.error("Failed to sync wishlist:", e);
+      }
+    };
+
+    window.addEventListener("wishlistUpdated", handleWishlistUpdate);
+    window.addEventListener("storage", handleWishlistUpdate);
+
+    return () => {
+      window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
+      window.removeEventListener("storage", handleWishlistUpdate);
+    };
   }, []);
 
   // Persist liked products to localStorage when changed
@@ -284,14 +325,19 @@ export default function SparePartsPage() {
     // dispatch async event so Header updates outside render
     try {
       setTimeout(() => { window.dispatchEvent(new Event('wishlistUpdated')); }, 0);
-    } catch (e) {}
+    } catch (e) { }
   }, [likedProducts]);
 
   const toggleLike = (product: Product) => {
-    setLikedProducts((prev) => {
-      const exists = prev.includes(product.id);
-      return exists ? prev.filter((x) => x !== product.id) : [...prev, product.id];
-    });
+    const exists = likedProducts.includes(product.id);
+
+    if (exists) {
+      setLikedProducts((prev) => prev.filter((x) => x !== product.id));
+      toast.info("Removed from Wishlist");
+    } else {
+      setLikedProducts((prev) => [...prev, product.id]);
+      toast.success("Added to Wishlist");
+    }
   };
 
   // use CartContext if available so header/cart updates correctly
@@ -320,7 +366,7 @@ export default function SparePartsPage() {
   // Filter products based on selected category AND search query
   let filteredProducts = allProducts.filter(product => {
     const categoryMatch = selectedCategory === null || product.categoryType === selectedCategory;
-    const searchMatch = searchQuery.trim() === "" || 
+    const searchMatch = searchQuery.trim() === "" ||
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase());
     return categoryMatch && searchMatch;
@@ -377,54 +423,49 @@ export default function SparePartsPage() {
           <div className="flex flex-wrap gap-3 justify-center mt-6">
             <button
               onClick={() => setSelectedCategory(null)}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${
-                selectedCategory === null
-                  ? "bg-[#048567] text-white shadow-lg scale-105"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${selectedCategory === null
+                ? "bg-[#048567] text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+                }`}
             >
               All Categories
             </button>
             <button
               onClick={() => setSelectedCategory("laptop")}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                selectedCategory === "laptop"
-                  ? "bg-[#048567] text-white shadow-lg scale-105"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${selectedCategory === "laptop"
+                ? "bg-[#048567] text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+                }`}
             >
               <Laptop className="w-4 h-4" />
               Laptop Spare Parts
             </button>
             <button
               onClick={() => setSelectedCategory("mobile")}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                selectedCategory === "mobile"
-                  ? "bg-[#048567] text-white shadow-lg scale-105"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${selectedCategory === "mobile"
+                ? "bg-[#048567] text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+                }`}
             >
               <Smartphone className="w-4 h-4" />
               Mobile Spare Parts
             </button>
             <button
               onClick={() => setSelectedCategory("iphone")}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                selectedCategory === "iphone"
-                  ? "bg-[#048567] text-white shadow-lg scale-105"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${selectedCategory === "iphone"
+                ? "bg-[#048567] text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+                }`}
             >
               <Apple className="w-4 h-4" />
               iPhone Spare Parts
             </button>
             <button
               onClick={() => setSelectedCategory("mac")}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                selectedCategory === "mac"
-                  ? "bg-[#048567] text-white shadow-lg scale-105"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 ${selectedCategory === "mac"
+                ? "bg-[#048567] text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-gray-100 shadow-sm"
+                }`}
             >
               <MonitorSmartphone className="w-4 h-4" />
               Mac Spare Parts
@@ -446,13 +487,13 @@ export default function SparePartsPage() {
           <h2 className="text-2xl font-black text-gray-900 mb-6 uppercase">
             {searchQuery.trim() !== "" ? "Search Results" : "Featured Products"}
           </h2>
-          
+
           {filteredProducts.length === 0 ? (
             <div className="text-center py-12">
               <Search className="w-16 h-16 mx-auto text-gray-300 mb-4" />
               <h3 className="text-xl font-bold text-gray-700 mb-2">No products found</h3>
               <p className="text-gray-500">
-                {searchQuery.trim() !== "" 
+                {searchQuery.trim() !== ""
                   ? `No products match your search for "${searchQuery}". Try a different term.`
                   : "No products available in this category."}
               </p>
@@ -496,9 +537,8 @@ export default function SparePartsPage() {
                           className="flex items-center justify-center w-10 h-10 p-0 rounded-full bg-white/90 hover:bg-white shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                         >
                           <Heart
-                            className={`w-5 h-5 transition-all duration-200 ${
-                              likedProducts.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'
-                            }`}
+                            className={`w-5 h-5 transition-all duration-200 ${likedProducts.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'
+                              }`}
                           />
                         </button>
                       </div>

@@ -14,7 +14,7 @@ export default async function HomePage() {
       <CategoryNavigation />
 
       {/* Why Shop With Us Section */}
-      <section className="py-24 px-4 bg-gray-50 rounded-[4rem] mx-4 my-8">
+      <section className="py-12 md:py-24 px-4 bg-gray-50 rounded-[2.5rem] md:rounded-[4rem] mx-2 md:mx-4 my-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-[#0066cc]/5 text-[#0066cc] px-6 py-2 rounded-full text-[10px] font-black tracking-[0.2em] mb-8 uppercase">
             The Mobile Spare Advantage
@@ -82,8 +82,8 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Banner / CTA */}
-      <section className="py-24 px-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto bg-[#1a1a1a] rounded-[3.5rem] p-12 lg:p-24 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12">
+      <section className="py-12 md:py-24 px-2 md:px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto bg-[#1a1a1a] rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-12 lg:p-24 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12">
           {/* Decorative background light */}
           <div className="absolute top-0 left-0 w-full h-full bg-[#0066cc]/5 pointer-events-none"></div>
 
